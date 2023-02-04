@@ -23,29 +23,34 @@ namespace OrderImport
             Order newOrder = null;
             int linesWithErrors = 0;
 
+            //Get the total lines to add the last otder to the list of orders at the end of file.
             int totalLines = System.IO.File.ReadLines(FileLocation).Count();
 
-            // Read the file and display it line by line.  
+            // Read the file line by line.  
             foreach (string line in System.IO.File.ReadLines(FileLocation))
             {
                 lineCounter++;
+
+                //Prevent errors if the file is blank
                 if (line.Length <= 3)
                     continue;
 
+                //Get the type of line 
                 var LineType = line.Substring(0, 3);
+
                 try
                 {
                     switch (LineType)
                     {
                         case "100":
 
+                            //If it is not the first header in the file, the order is added to the list of orders
                             if (newOrder != null)
                             {
                                 orders.Add(newOrder);
                             }
 
-                            newOrder = new Order();
-                           // Console.WriteLine("Header");
+                            newOrder = new Order(); 
                             CurrentOrder = line.Substring(3, 10);
                             //Create Header
 
@@ -64,10 +69,9 @@ namespace OrderImport
                             counter++;
 
                             break;
-                        case "200":
-                            //Console.WriteLine("Address");
+                        case "200": 
                             //Create Address Line 
-                            if (newOrder != null)
+                            if (newOrder != null)//Prevent errors if the file starts with a 200 line type
                             {
                                 newOrder.Address.AddressLine1 = line.Substring(3, 50);
                                 newOrder.Address.AddressLine2 = line.Substring(53, 50);
@@ -77,8 +81,7 @@ namespace OrderImport
                             }
 
                             break;
-                        case "300":
-                            //Console.WriteLine("OrderDetails");
+                        case "300": 
                             //Create Order Details Line
                             OrderDetails newOD = new OrderDetails
                             {
@@ -88,7 +91,7 @@ namespace OrderImport
                                 TotalCost = decimal.Parse(line.Substring(20, 10)),
                                 Description = line.Substring(30, 50)
                             };
-                            if (newOrder != null)
+                            if (newOrder != null) //Prevent errors if the file starts with a 300 line type
                             {
                                 newOrder.OrderDetails.Add(newOD);
                             }
@@ -97,6 +100,7 @@ namespace OrderImport
                             break;
                     }                     
 
+                    //At the EOF we add the current order to the list
                     if (newOrder != null & lineCounter == totalLines )
                     {
                         orders.Add(newOrder);
